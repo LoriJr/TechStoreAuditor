@@ -6,9 +6,7 @@ import br.com.loutech.TechStoreAuditor.model.ProductEntity;
 import br.com.loutech.TechStoreAuditor.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,12 +27,17 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<ProductEntity> findById(Long id){
-        return repository.findById(id);
+    public ProductResponseDTO findById(Long id){
+        return repository.findById(id)
+                .map(mapper::toDTO)
+                .orElseThrow(() -> new RuntimeException("Product not found " + id));
     }
 
-    public ProductEntity saveProduct(ProductEntity product){
-        return repository.save(product);
+    public ProductResponseDTO saveProduct(ProductResponseDTO dto){
+        ProductEntity entity = mapper.toEntity(dto);
+        entity.setActive(true);
+        ProductEntity saved = repository.save(entity);
+        return mapper.toDTO(saved);
     }
 
     public void deleteProduct(Long id){
